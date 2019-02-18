@@ -1,0 +1,70 @@
+---
+title: "ML project"
+author: "Shaked"
+date: "February 9, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+First, load the training and test data
+```{r, cache=TRUE}
+raw_training <- read.csv("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv")
+raw_test <- read.csv("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv")
+```
+clean up the data: Some columns are almost entirely comprised of missing values, so we eliminate those. We also eliminate the index, timestamp, and window variables (which are dependant on the classe).
+```{r}
+eliminator <- function(col) {sum(is.na(col))/length(col)<0.8 && sum(col=="")/length(col)<0.8 &&  !("#DIV/0!" %in% col)}
+goodcols <- sapply(raw_training,eliminator)
+raw_training <- raw_training[goodcols]
+raw_test<- raw_test[goodcols]
+
+badcols = c("X","user_name","raw_timestamp_part_1","raw_timestamp_part_2","cvtd_timestamp","new_window","num_window")
+raw_training <- raw_training[!names(raw_training) %in% badcols]
+raw_test <- raw_test[!names(raw_test) %in% badcols]
+```
+
+Split the raw training data into training and validation sets
+
+```{r, cache=TRUE}
+require(caret)
+set.seed(5423)
+inTrain = createDataPartition(raw_training$classe, p = 3/4)[[1]]
+
+
+training = raw_training[ inTrain,]
+validation = raw_training[-inTrain,]
+```
+
+First, check what happens if we train a random forest on the training data
+```{r, cache=TRUE}
+require(randomForest)
+set.seed(34532)
+forest_model <- randomForest(classe~.,data=training)
+#Check the accuracy on the validation set
+sum(predict(forest_model,validation)==validation$classe)/length(validation$classe)
+```
+
+Next, check an lda model
+```{r, cache=TRUE}
+require(caret)
+set.seed(2345)
+lda_model <- train(classe~.,data=training,method="lda")
+#Check the accuracy on the validation set
+sum(predict(lda_model,validation)==validation$classe)/length(validation$classe)
+```
+
+As we see, the random forest model is significantly more accurate than the lda model. Finally, we use it to predict on the test data:
+
+```{r}
+predict(forest_model,raw_test)
+```
+
+
+
+
+
+
+
