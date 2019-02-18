@@ -173,6 +173,11 @@ lda_model &lt;- train(classe~.,data=training,method=&quot;lda&quot;)
 sum(predict(lda_model,validation)==validation$classe)/length(validation$classe)</code></pre>
 <pre><code>## [1] 0.70677</code></pre>
 <p>As we see, the random forest model is significantly more accurate than the lda model. Finally, we use it to predict on the test data:</p>
+<pre class="r"><code>require(randomForest)</code></pre>
+<pre><code>## Loading required package: randomForest</code></pre>
+<pre><code>## Warning: package 'randomForest' was built under R version 3.5.2</code></pre>
+<pre><code>## randomForest 4.6-14</code></pre>
+<pre><code>## Type rfNews() to see new features/changes/bug fixes.</code></pre>
 <pre class="r"><code>predict(forest_model,raw_test)</code></pre>
 <pre><code>##  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 
 ##  B  A  B  A  A  E  D  B  A  A  B  C  B  A  E  E  A  B  B  B 
